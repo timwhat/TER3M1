@@ -1,17 +1,21 @@
+import ast
+
 class Reservation:
     def __init__(self, name, id, role, reason, startTime, endTime):
         self.name = name
         self.id = id
         self.role = role
         self.reason = reason
-        self.timeRange = timeRange
+        self.startTime = startTime
+        self.endTime = endTime
     def dict(self):
         return {
             "name":self.name,
             "id":self.id,
             "role":self.role,
             "reason":self.reason,
-            "timeRange":self.timeRange
+            "startTime":self.startTime,
+            "endTime":self.endTime
         }
     def createReservation(self):
         # Logic to create a reservation
@@ -54,14 +58,10 @@ def main():
         # print("Invalid option. Please try again.")
         pass
 
-def retrieveNormalRooms():
+def retrieveRooms():
     # TODO adda what if this file doesnt exist
     with open ("rooms.txt","r") as f:
-        roomFile = f.read()
-    print(roomFile)
-    
-def retrieveSpecialRooms():
-    pass
+        return ast.literal_eval(f.read())
 
 # Used to visually seperate text in the terminal
 def textSeperator():
@@ -69,11 +69,19 @@ def textSeperator():
 
 #main()
 
-testerObject = Reservation(1,2,3,4,(5,6))
-testerObjectDict = Reservation.dict(testerObject)
+testerObject1 = Reservation(1,2,3,4,5,6)
+testerObjectDict1 = Reservation.dict(testerObject1)
+
+testerObject2 = Reservation(10,20,30,40,50,60)
+testerObjectDict2 = Reservation.dict(testerObject2)
+
 dict = {
-  "room101": testerObjectDict,
+  "room101": (testerObjectDict1,testerObjectDict2),"library":()
 }
 
 with open ("rooms.txt","w") as f:
-    f.write(str(dict))    
+    f.write(str(dict))
+
+readeth = retrieveRooms()
+
+print(readeth["room101"][1])
