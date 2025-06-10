@@ -1,5 +1,5 @@
 import ast
-
+import time
 # Reservation System for a School
 # This system allows users to create reservations for rooms, view existing reservations, search for available rooms, and generate reports.
 class Reservation:
@@ -19,19 +19,19 @@ class Reservation:
             "startTime":self.startTime,
             "endTime":self.endTime
         }
-    # searhces for the information
+    # searches for the information
     
 def main():
     global rooms
     rooms = retrieveRooms()
     # Options Menu
-    print("Welcome to the Reservation System")
-    print("1. Create a Reservation")
+    slowPrint(0.05, "Welcome to the Reservation System\n")
+    slowPrint(0.05, "1. Create a Reservation\n")
     print("2. View Reservations")
     print("3. Search Available Rooms")
     print("4. Generate Report")
     print("5. Exit")
-    choice = input("Please select an option [1-5]: ")
+    choice = input("Please select an option [1-5]:")
     textSeperator()
     # Handle user choice
     if choice == '1':
@@ -70,15 +70,15 @@ def generateInitialRooms():
     tempDict = {}
     for i in range(101,200):
         tempRoomName = "room" + str(i)
-        tempDict.update({tempRoomName:()})
-    tempDict.update({"smallGym":()})
-    tempDict.update({"largeGym":()})
-    tempDict.update({"library":()})
-    tempDict.update({"compLab1":()})
-    tempDict.update({"compLab2":()})
+        tempDict.update({tempRoomName:[]})
+    tempDict.update({"smallGym":[]})
+    tempDict.update({"largeGym":[]})
+    tempDict.update({"library":[]})
+    tempDict.update({"compLab1":[]})
+    tempDict.update({"compLab2":[]})
     with open ("rooms.txt","w") as f:
         f.write(str(tempDict))
-# Used to visually seperate text in the terminal
+# Used to visually separate text in the terminal
 def textSeperator():
     print('\n/************************************************************************/\n')
     
@@ -88,16 +88,30 @@ def createReservation():
     tempName = inputChecker("Enter your name:\t\t")
     tempId = inputChecker("Enter your ID:\t\t\t")
     tempRole = inputChecker("Enter your role:\t\t")
-    tempReason = inputChecker("Enter reason:\t\t")
+    tempReason = inputChecker("Enter reason:\t\t\t")
     tempStartTime = inputChecker("Enter start time (ex. 10):\t", int)
     tempEndTime = inputChecker("Enter end time (ex. 22):\t", int)   
     if checkTimeSlot(roomForReservation,tempStartTime,tempEndTime):
+        print("timslot success")
         tempReservation = Reservation(tempName,tempId,tempRole,tempReason,tempStartTime,tempEndTime)
+        rooms[roomForReservation].append(tempReservation)
+        print(rooms)
 
+# Check if the time slot is available
 def checkTimeSlot(room,startTime,endTime):
-    currentRoomSchedule = rooms[room]
-    for 
-    if 
+    takenHours = []
+    requestedHours = []
+    selectedRoomSchedule = rooms[room]
+    for reservation in selectedRoomSchedule:
+        for hour in range(reservation.startTime,reservation.endTime):
+            takenHours.append(hour)
+    for hour in range(startTime,endTime):
+        requestedHours.append(hour)
+    for i in requestedHours:
+        if i in takenHours:
+            return False
+    return True
+        
 
 # Input Checker, to make sure the input is the right type
 def inputChecker(inputText = '', typeOfInput = str):
@@ -107,6 +121,20 @@ def inputChecker(inputText = '', typeOfInput = str):
             return userInput
         except ValueError:
             continue
+
+# Function to print text with a delay between each character
+def slowPrint( delay, *args):
+    text = ' '.join(map(str, args))
+    for char in text:
+        print(char, end='', flush=True)
+        time.sleep(delay)
+
+# Check if the room number is valid
+def roomNumChecker(roomName):
+    global rooms
+    if roomName in rooms:
+        return True
+    return False
 
 main()
 
