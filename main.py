@@ -1,5 +1,11 @@
 import ast
 import time
+import os
+import prettytable
+
+fileDirectory = os.path.dirname(os.path.abspath(__file__))
+parentDirectory = os.path.dirname(fileDirectory)
+
 # Reservation System for a School
 # This system allows users to create reservations for rooms, view existing reservations, search for available rooms, and generate reports.
 class Reservation:
@@ -24,47 +30,84 @@ class Reservation:
 def main():
     global rooms
     rooms = retrieveRooms()
+    print(rooms)
     # Options Menu
-    slowPrint(0.05, "Welcome to the Reservation System\n")
-    slowPrint(0.05, "1. Create a Reservation\n")
-    print("2. View Reservations")
-    print("3. Search Available Rooms")
-    print("4. Generate Report")
-    print("5. Exit")
-    choice = input("Please select an option [1-5]:")
-    textSeperator()
-    # Handle user choice
-    if choice == '1':
-        createReservation()
-        pass
-    elif choice == '2':
-        # viewReservations()
-        pass
-    elif choice == '3':
-        # searchAvailableRooms()
-        pass
-    elif choice == '4':
-        # generateReport()
-        pass
-    elif choice == '5':
-        # print("Exiting the system. Goodbye!")
-        pass
-    else:
-        # print("Invalid option. Please try again.")
-        pass
+    exit = False
+    while not exit:
+        slowPrint(0.01, "Welcome to the Reservation System\n\n")
+        slowPrint(0.005, "1. Create a Reservation\n")
+        slowPrint(0.005, "2. View Reservations\n")
+        slowPrint(0.005, "3. Search Available Rooms\n")
+        slowPrint(0.005, "4. Generate Report\n")
+        slowPrint(0.005, "5. Exit\n\n")
+        slowPrint(0.005, "Please select an option [1-5]:")
+        choice = inputChecker("", int)
+        textSeperator()
+        # Handle user choice
+        if choice == 1:
+            createReservation()
+        elif choice == 2:
+            viewReservations()
+        elif choice == 3:
+            # searchAvaislableRooms()
+            pass
+        elif choice == 4:
+            # generateReport()
+            pass
+        elif choice == 5:
+            updateRoomsFile()
+            print("Exiting the system. Goodbye!")
+            exit = True
+        else:
+            # print("Invalid option. Please try again.")
+            pass
+        textSeperator()
 
 def retrieveRooms():
-    # TODO adda what if this file doesnt exist
-    with open ("rooms.txt","r") as f:
-        return ast.literal_eval(f.read())
+    try:
+        with open ("rooms.txt","r") as f:
+            return ast.literal_eval(f.read())
+    except FileNotFoundError:
+        slowPrint(0.005, "rooms.txt not found. Generating initial rooms...")
+        generateInitialRooms()
+        with open ("rooms.txt","r") as f:
+            unconvertedRoomsList = ast.literal_eval(f.read())
+        convertedRoomsList = unconvertedRoomsList
+        for room in unconvertedRoomsList:
+            for index, reservation in enumerate(room):
+                convertedRoomsList[room][index] = objectifyDictionary(reservation)
+        return convertedRoomsList
 
-def objectifyDictionary(inDict):
-    for room in inDict:
-        x = x
+def objectifyDictionary(dictionary):
+    newObject = Reservation(dictionary["name"],dictionary["id"],dictionary["role"],dictionary["reason"],dictionary["startTime"],dictionary["endTime"])
+    return newObject
 
+def viewReservations():
+    selectedRoom = input("which room would you like to view the reservations for?\t")
+    print('===============')
+    resCounter = 1
+    
+    for reservation in rooms[selectedRoom]:
+        print(str(resCounter)+":")
+        print(f"start time: {reservation.startTime}:00")
+        print("end time: "+str(reservation.endTime)+":00")
+        print('===============')
+        resCounter += 1
+        
 def updateRoomsFile():
+    tempRooms = rooms
+    for room in rooms:
+        reservationList= tempRooms[room]
+        newReservationList = []
+        for reservation in reservationList:
+            tempDict = reservation.dict()
+            newReservationList.append(tempDict)
+            print(tempDict)
+        print(room,reservationList,newReservationList)
+        tempRooms[room] = newReservationList
     with open ("rooms.txt","w") as f:
-        f.write(str(rooms))
+        f.write(str(tempRooms))
+        pass
 
 def generateInitialRooms():
     tempDict = {}
@@ -78,27 +121,33 @@ def generateInitialRooms():
     tempDict.update({"compLab2":[]})
     with open ("rooms.txt","w") as f:
         f.write(str(tempDict))
-# Used to visually separate text in the terminal
+# Used to visually separate text in the terminal 
 def textSeperator():
     print('\n/************************************************************************/\n')
     
 def createReservation():
     roomForReservation = inputChecker("Enter the room you want to reserve\npossible reservations: [rooms 101-199, smallGym, largeGym, library, compLab1, and compLab2]:\n")
     # Logic to create a reservation
-    tempName = inputChecker("Enter your name:\t\t")
-    tempId = inputChecker("Enter your ID:\t\t\t")
-    tempRole = inputChecker("Enter your role:\t\t")
-    tempReason = inputChecker("Enter reason:\t\t\t")
-    tempStartTime = inputChecker("Enter start time (ex. 10):\t", int)
-    tempEndTime = inputChecker("Enter end time (ex. 22):\t", int)   
+    slowPrint(0.005, "Enter your name:\t\t")
+    tempName = inputChecker()
+    slowPrint(0.005, "Enter your ID:\t\t\t")
+    tempId = inputChecker()
+    slowPrint(0.005, "Enter your role:\t\t")
+    tempRole = inputChecker()
+    slowPrint(0.005, "Enter reason:\t\t\t")
+    tempReason = inputChecker()
+    slowPrint(0.005, "Enter start time (ex. 10):\t")
+    tempStartTime = inputChecker("", int)
+    slowPrint(0.005, "Enter end time (ex. 22):\t")
+    tempEndTime = inputChecker("", int)
+    
     if checkTimeSlot(roomForReservation,tempStartTime,tempEndTime):
-        print("timslot success")
         tempReservation = Reservation(tempName,tempId,tempRole,tempReason,tempStartTime,tempEndTime)
         rooms[roomForReservation].append(tempReservation)
-        print(rooms)
+        # print(rooms)
 
 # Check if the time slot is available
-def checkTimeSlot(room,startTime,endTime):
+def checkTimeSlot(room, startTime, endTime):
     takenHours = []
     requestedHours = []
     selectedRoomSchedule = rooms[room]
@@ -109,7 +158,12 @@ def checkTimeSlot(room,startTime,endTime):
         requestedHours.append(hour)
     for i in requestedHours:
         if i in takenHours:
+            textSeperator()
+            slowPrint(0.005, "Time slot invalid. Try again please")
             return False
+    textSeperator()
+    slowPrint(0.005, "Booking successful.\n")
+    time.sleep(2)
     return True
         
 
