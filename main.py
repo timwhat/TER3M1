@@ -166,6 +166,7 @@ def textSeperator():
 # Function to create a reservation
 def createReservation():
     # Getting the User Input 
+    #TODO add something where you can type -1 to exit out
     slowPrint(fastText, "\nEnter the room you want to reserve [rooms 101-199, smallGym, largeGym, library, compLab1, and compLab2]:\n\t")
     roomForReservation = inputChecker("")
     textSeperator()
@@ -182,6 +183,9 @@ def createReservation():
         tempDate = inputChecker("", str)
         try:
             datetime.datetime.strptime(tempDate, "%Y-%m-%d")
+            if tempDate < currentDate:
+                slowPrint(fastText, "Date cannot be in the past. Please enter a valid date.\n")
+                continue
             break
         except ValueError:
             print("Invalid date format. Please enter as YYYY-MM-DD.")
