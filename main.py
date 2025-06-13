@@ -51,16 +51,21 @@ def main():
                 print("Invalid room name. Please try again.")
                 continue
         elif choice == 3:
-            #TODO: How do we wanna display this??!?
-            # Thinking rn we can just ask user for a list of rooms and display
-            pass
-        elif choice == 4:
-            subChoice = inputChecker("Do you want to generate a report for a user or for a room? [1-2]:\t", int)
+            slowPrint(fastText, "Enter the start date for statistics (YYYY-MM-DD):\t")
+            searchStartDate = inputChecker("", str)
+            slowPrint(fastText, "Enter the end date for statistics (YYYY-MM-DD):\t")
+            searchEndDate = inputChecker("", str)
+            subChoice = inputChecker("Do you want to generate statistics for a user or for a room? [1-2]:\t", int)
             if subChoice == 1:
                 userName = inputChecker("Enter the name of the user:\t")
-            if subChoice == 2:
+                generateUserStatistics(userName, searchStartDate, searchEndDate)
+            elif subChoice == 2:
                 roomName = inputChecker("Enter the name of the room:\t")
-        elif choice == 5:
+                generateRoomStatistics(roomName, searchStartDate, searchEndDate)
+            else:
+                slowPrint(fastText, "Invalid option. Please try again.\n")
+                continue
+        elif choice == 4:
             updateRoomsFile()
             print("Exiting the system. Goodbye!")
             exit = True
@@ -158,6 +163,41 @@ def generateInitialRooms():
     print(roomsFilePath)
     with open (roomsFilePath,"w") as f:
         f.write(str(tempDict))
+
+def generateUserStatistics(userName, startDate, endDate):
+    global rooms
+    userReservations = []
+    for room in rooms:
+        for reservation in rooms[room]:
+            if reservation.name == userName and startDate <= reservation.date <= endDate:
+                userReservations.append(reservation)
+    
+    if not userReservations:
+        print(f"No reservations found for {userName} between {startDate} and {endDate}.")
+        return
+    
+    print(f"Reservations for {userName} from {startDate} to {endDate}:")
+    for res in userReservations:
+        print(f"Room: {res.name}, Date: {res.date}, Start Time: {res.startTime}:00, End Time: {res.endTime}:00, Reason: {res.reason}")
+    
+def generateRoomStatistics(roomName, startDate, endDate):
+    global rooms
+    if roomName not in rooms:
+        print(f"Room {roomName} does not exist.")
+        return
+    
+    roomReservations = []
+    for reservation in rooms[roomName]:
+        if startDate <= reservation.date <= endDate:
+            roomReservations.append(reservation)
+    
+    if not roomReservations:
+        print(f"No reservations found for {roomName} between {startDate} and {endDate}.")
+        return
+    
+    print(f"Reservations for {roomName} from {startDate} to {endDate}:")
+    for res in roomReservations:
+        print(f"Name: {res.name}, ID: {res.id}, Role: {res.role}, Date: {res.date}, Start Time: {res.startTime}:00, End Time: {res.endTime}:00, Reason: {res.reason}")
         
 # Used to visually separate text in the terminal 
 def textSeperator():
@@ -198,12 +238,22 @@ def createReservation():
         tempReservation = Reservation(tempName,tempId,tempRole,tempReason, tempDate, tempStartTime,tempEndTime)
         rooms[roomForReservation].append(tempReservation)
         # print(rooms)
+
 def deleteReservation():
-    selectedRoom = input("which room would you like to delete a reservation from?\t")
-    viewReservations(selectedRoom)
+    # TODO Complete nice formatting
+    slowPrint(fastText, "Which room would you like to delete a reservation from?\t")
+    try:
+        selectedRoom = inputChecker("", str)
+        if not roomNumChecker(selectedRoom):
+            slowPrint(fastText, "Invalid room name. Please try again.\n")
+            return
+    except ValueError:
+        slowPrint(fastText, "Invalid input. Please enter a valid room name.\n")
+        return
     selectedReservation = inputChecker("which reservation would you like to delete?\t",int)
     textSeperator()
     rooms[selectedRoom].pop(selectedReservation-1)
+
 # Check if the time slot is available
 def checkTimeSlot(room, date, startTime, endTime):
     takenHours = []
