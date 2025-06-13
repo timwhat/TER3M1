@@ -1,9 +1,11 @@
 import ast
 import time
+import datetime
 
 # configS
 roomsFilePath = "rooms.txt"
 fastText = 0.005
+currentDate = datetime.datetime.now().strftime("%Y-%m-%d")
 
 # Reservation System for a School
 # This system allows users to create reservations for rooms, view existing reservations, search for available rooms, and generate reports.  
@@ -16,11 +18,14 @@ def main():
     while not exit:
         textSeperator()
         slowPrint(0.01, "Welcome to the Reservation System!\n\n")
+        
+        slowPrint(fastText, "Today's date is: ", currentDate, "\n")
+        slowPrint(fastText, "Please select an option from the menu below:\n\n")
         slowPrint(fastText, "1. Create/Delete a Reservation\n")
-        slowPrint(fastText, "2. View Reservations\n")
-        slowPrint(fastText, "3. Search Available Rooms\n")
-        slowPrint(fastText, "4. Generate Report\n")
-        slowPrint(fastText, "5. Exit\n\n")
+        slowPrint(fastText, "2. View Reservations / Search Available Rooms\n") # we combining this with search available rooms
+        # slowPrint(fastText, "3. Search Available Rooms\n")
+        slowPrint(fastText, "3. Generate Report\n")
+        slowPrint(fastText, "4. Exit\n\n")
         slowPrint(fastText, "Please select an option [1-5]:\t")
         choice = inputChecker("", int)
         textSeperator()
