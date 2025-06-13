@@ -70,11 +70,12 @@ def main():
         # textSeperator()
         
 class Reservation:
-    def __init__(self, name, id, role, reason, startTime, endTime):
+    def __init__(self, name, id, role, reason, date, startTime, endTime):
         self.name = name
         self.id = id
         self.role = role
         self.reason = reason
+        self.date = date
         self.startTime = startTime
         self.endTime = endTime
     def dict(self):
@@ -83,14 +84,21 @@ class Reservation:
             "id":self.id,
             "role":self.role,
             "reason":self.reason,
+            "date":self.date,
             "startTime":self.startTime,
             "endTime":self.endTime
         }
     # searches for the information
 
 def retrieveRooms():
-    with open (roomsFilePath,"r") as f:
-        unconvertedRoomsList = ast.literal_eval(f.read())
+    try:
+        with open (roomsFilePath,"r") as f:
+            unconvertedRoomsList = ast.literal_eval(f.read())
+    except FileNotFoundError:
+        print("Rooms file not found. Generating initial rooms...")
+        generateInitialRooms()
+        with open (roomsFilePath,"r") as f:
+            unconvertedRoomsList = ast.literal_eval(f.read())
     # print(unconvertedRoomsList)
     convertedRoomsList = unconvertedRoomsList
     for room in unconvertedRoomsList:
@@ -100,19 +108,26 @@ def retrieveRooms():
     return convertedRoomsList
                                                                                                                         
 def objectifyDictionary(dictionary):
-    newObject = Reservation(dictionary["name"],dictionary["id"],dictionary["role"],dictionary["reason"],dictionary["startTime"],dictionary["endTime"])
+    newObject = Reservation(dictionary["name"],dictionary["id"],dictionary["role"],dictionary["reason"],dictionary["date"], dictionary["startTime"],dictionary["endTime"])
     # print("objectified",dictionary,"into",newObject)
     return newObject
 
 def viewReservations(selectedRoom):
     
-    print('===============')
+    # print('===============')
     resCounter = 1
     
     for reservation in rooms[selectedRoom]:
-        print(str(resCounter)+":")
-        print(f"start time: {reservation.startTime}:00")
-        print("end time: "+str(reservation.endTime)+":00")
+        print(f"Reservation #{resCounter}")
+        print('===============')
+        print(f"Name      : {reservation.name}")
+        print(f"ID        : {reservation.id}")
+        print(f"Role      : {reservation.role}")
+        print(f"Reason    : {reservation.reason}")
+        print(f"Date      : {reservation.date}")
+        print(f"Start Time: {reservation.startTime}:00")
+        print(f"End Time  : {reservation.endTime}:00")
+        print("-" * 30 + "\n")
         print('===============')
         resCounter += 1
         
@@ -162,13 +177,21 @@ def createReservation():
     tempRole = inputChecker()
     slowPrint(fastText, "Enter reason:\t\t\t")
     tempReason = inputChecker()
+    slowPrint(fastText, "Enter date (YYYY-MM-DD):\t")
+    while True:
+        tempDate = inputChecker("", str)
+        try:
+            datetime.datetime.strptime(tempDate, "%Y-%m-%d")
+            break
+        except ValueError:
+            print("Invalid date format. Please enter as YYYY-MM-DD.")
     slowPrint(fastText, "Enter start time (ex. 10):\t")
     tempStartTime = inputChecker("", int)
     slowPrint(fastText, "Enter end time (ex. 22):\t")
     tempEndTime = inputChecker("", int)
     
-    if checkTimeSlot(roomForReservation,tempStartTime,tempEndTime):
-        tempReservation = Reservation(tempName,tempId,tempRole,tempReason,tempStartTime,tempEndTime)
+    if checkTimeSlot(roomForReservation, tempDate, tempStartTime,tempEndTime):
+        tempReservation = Reservation(tempName,tempId,tempRole,tempReason, tempDate, tempStartTime,tempEndTime)
         rooms[roomForReservation].append(tempReservation)
         # print(rooms)
 def deleteReservation():
@@ -178,11 +201,13 @@ def deleteReservation():
     textSeperator()
     rooms[selectedRoom].pop(selectedReservation-1)
 # Check if the time slot is available
-def checkTimeSlot(room, startTime, endTime):
+def checkTimeSlot(room, date, startTime, endTime):
     takenHours = []
     requestedHours = []
     selectedRoomSchedule = rooms[room]
     for reservation in selectedRoomSchedule:
+        if reservation.date != date:
+            continue
         for hour in range(reservation.startTime,reservation.endTime):
             takenHours.append(hour)
     for hour in range(startTime,endTime):
