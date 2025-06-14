@@ -1,6 +1,7 @@
 import ast
 import time
 import datetime
+from datetime import timedelta
 
 # configS
 roomsFilePath = "rooms.txt"
@@ -22,7 +23,7 @@ def main():
         slowPrint(fastText, "Today's date is: ", currentDate, "\n")
         slowPrint(fastText, "Please select an option from the menu below:\n\n")
         slowPrint(fastText, "1. Create/Delete a Reservation\n")
-        slowPrint(fastText, "2. View Reservations / Search Available Rooms\n") # we combining this with search available rooms
+        slowPrint(fastText, "2. View Reservations / Search Available Hours\n") # we combining this with search available rooms
         # slowPrint(fastText, "3. Search Available Rooms\n")
         slowPrint(fastText, "3. Generate Report\n")
         slowPrint(fastText, "4. Exit\n\n")
@@ -44,11 +45,19 @@ def main():
                 slowPrint(fastText, "Invalid option. Please try again.\n")
                 continue
         elif choice == 2:
-            selectedRoom = input("which room would you like to view the reservations for?\t")
-            try: 
-                viewReservations(selectedRoom)
-            except KeyError:
-                print("Invalid room name. Please try again.")
+            slowPrint(fastText, "Do you want to view reservations or search a room for avaliable hours? [1-2]:\t")
+            subChoice = inputChecker("", int)
+            if subChoice == 1 or subChoice == '':
+                selectedRoom = input("which room would you like to view the reservations for?\t")
+                try: 
+                    viewReservations(selectedRoom)
+                except KeyError:
+                    print("Invalid room name. Please try again.")
+                continue
+            elif subChoice == 2:
+                searchAvaliableHours()
+            else:
+                slowPrint(fastText, "Invalid option. Please try again.\n")
                 continue
         elif choice == 3:
             slowPrint(fastText, "Enter the start date for statistics (YYYY-MM-DD):\t")
@@ -197,7 +206,50 @@ def generateRoomStatistics(roomName, startDate, endDate):
     print(f"Reservations for {roomName} from {startDate} to {endDate}:")
     for res in roomReservations:
         print(f"Name: {res.name}, ID: {res.id}, Role: {res.role}, Date: {res.date}, Start Time: {res.startTime}:00, End Time: {res.endTime}:00, Reason: {res.reason}")
+
+def searchAvaliableHours():
+    slowPrint(fastText, "\nEnter the room you want to reserve [rooms 101-199, smallGym, largeGym, library, compLab1, and compLab2]:\n\t")
+    roomName = inputChecker("")
+    slowPrint(fastText, "Enter starting date (YYYY-MM-DD):\t")
+    startDate = convertStringDateToDateObject(inputChecker(""))
+    slowPrint(fastText, "Enter ending date (YYYY-MM-DD):\t\t")
+    endDate = convertStringDateToDateObject(inputChecker(""))
+    roomData = rooms[roomName]
+    while startDate <= endDate:
+        hourVisualizer = []
+        for i in range(24):
+            hourVisualizer.append(".")
+        stringStartDate = startDate.strftime('%Y-%m-%d')
+        for reservation in roomData:
+            if reservation.date == stringStartDate:
+                for hour in range(reservation.startTime,reservation.endTime):
+                    hourVisualizer[hour] = "#"
+        stringVerHourVisualizer = ""
+        for i in hourVisualizer:
+            stringVerHourVisualizer += i
+        print(stringStartDate + "|   " + stringVerHourVisualizer)
+        startDate += timedelta(days=1)
+
+
+def convertStringDateToDateObject(stringVer):
+    stage = 0
+    year = ""
+    month = ""
+    day = ""
+    for i in stringVer:
+        if i == "-":
+            stage += 1
+            continue
+        if stage == 0:
+            year += i
+        if stage == 1:
+            month += i
+        if stage == 2:
+            day += i
+    return datetime.datetime(int(year),int(month),int(day))
+            
         
+
 # Used to visually separate text in the terminal 
 def textSeperator():
     print('\n/************************************************************************/\n')
@@ -314,7 +366,7 @@ def timesChecker(startTime,endTime):
 
 def timesInputChecker(inputText = ''):
     while True:
-        slowPrint(fastText, "Enter start time (ex. 10, minimum 1):\t")
+        slowPrint(fastText, "Enter start time (ex. 10, minimum 0):\t")
         startTime = inputChecker("",int)
         slowPrint(fastText, "Enter end time (ex. 22, maximum 24):\t")
         endTime = inputChecker("",int)
