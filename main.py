@@ -36,7 +36,7 @@ def main():
             subChoice = inputChecker("", int)
             if subChoice == 1 or subChoice == '':
                 createReservation()
-                slowPrint(fastText, "Creating a reservation...\n")
+                
             elif subChoice == 2:
                 deleteReservation()
                 slowPrint(fastText, "Deleting a reservation...\n")
@@ -119,7 +119,7 @@ def objectifyDictionary(dictionary):
 
 def viewReservations(selectedRoom):
     
-    # print('===============')
+    print('===============')
     resCounter = 1
     
     for reservation in rooms[selectedRoom]:
@@ -132,7 +132,6 @@ def viewReservations(selectedRoom):
         print(f"Date      : {reservation.date}")
         print(f"Start Time: {reservation.startTime}:00")
         print(f"End Time  : {reservation.endTime}:00")
-        print("-" * 30 + "\n")
         print('===============')
         resCounter += 1
         
@@ -229,14 +228,20 @@ def createReservation():
             break
         except ValueError:
             print("Invalid date format. Please enter as YYYY-MM-DD.")
-    slowPrint(fastText, "Enter start time (ex. 10):\t")
-    tempStartTime = inputChecker("", int)
-    slowPrint(fastText, "Enter end time (ex. 22):\t")
-    tempEndTime = inputChecker("", int)
+
+    timeRange = timesInputChecker()
+    tempStartTime = timeRange[0]
+    tempEndTime = timeRange[1]
+
+    # slowPrint(fastText, "Enter start time (ex. 10):\t")
+    # tempStartTime = inputChecker("", int)
+    # slowPrint(fastText, "Enter end time (ex. 22):\t")
+    # tempEndTime = inputChecker("", int)
     
     if checkTimeSlot(roomForReservation, tempDate, tempStartTime,tempEndTime):
         tempReservation = Reservation(tempName,tempId,tempRole,tempReason, tempDate, tempStartTime,tempEndTime)
         rooms[roomForReservation].append(tempReservation)
+        slowPrint(fastText, "Creating a reservation...\n")
         # print(rooms)
 
 def deleteReservation():
@@ -250,6 +255,7 @@ def deleteReservation():
     except ValueError:
         slowPrint(fastText, "Invalid input. Please enter a valid room name.\n")
         return
+    viewReservations(selectedRoom)
     selectedReservation = inputChecker("which reservation would you like to delete?\t",int)
     textSeperator()
     rooms[selectedRoom].pop(selectedReservation-1)
@@ -269,12 +275,12 @@ def checkTimeSlot(room, date, startTime, endTime):
     for i in requestedHours:
         if i in takenHours:
             textSeperator()
-            slowPrint(fastText, "Time slot invalid. Try again please")
+            slowPrint(fastText, "Time slot invalid. Try again please\n")
             return False
     textSeperator()
     slowPrint(0.1, ".......")
     slowPrint(fastText, "Booking successful.\n")
-    time.sleep(2)
+    time.sleep(0.5)
     return True
         
 # Input Checker, to make sure the input is the right type
@@ -299,6 +305,24 @@ def roomNumChecker(roomName):
     if roomName in rooms:
         return True
     return False
+
+def timesChecker(startTime,endTime):
+    if startTime >= 1 and endTime <= 24 and startTime < endTime:
+        return True  
+    else:
+        return False
+
+def timesInputChecker(inputText = ''):
+    while True:
+        slowPrint(fastText, "Enter start time (ex. 10, minimum 1):\t")
+        startTime = inputChecker("",int)
+        slowPrint(fastText, "Enter end time (ex. 22, maximum 24):\t")
+        endTime = inputChecker("",int)
+        if timesChecker(startTime,endTime):
+            return [startTime,endTime]
+        else:
+            print("Invalid time tange, try again")
+            continue
 
 main()
 
