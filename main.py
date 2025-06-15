@@ -77,9 +77,11 @@ def main():
             subChoice = inputChecker("Do you want to generate statistics for a user or for a room? [1-2]:\t", int)
             if subChoice == 1:
                 userName = inputChecker("Enter the name of the user:\t")
+                textSeparator()
                 generateUserStatistics(userName, searchStartDate, searchEndDate)
             elif subChoice == 2:
                 roomName = inputChecker("Enter the name of the room:\t")
+                textSeparator()
                 generateRoomStatistics(roomName, searchStartDate, searchEndDate)
             else:
                 slowPrint(fastText, "Invalid option. Please try again.\n")
@@ -143,7 +145,6 @@ def viewReservations(selectedRoom=None):
     reservationInfoTablePrinter(rooms[selectedRoom])
     enterToContinue()    
     
-    
 def updateRoomsFile():
     tempRooms = rooms
     for room in rooms:
@@ -193,6 +194,9 @@ def generateUserStatistics(userName, startDate, endDate):
     if unique_rooms:
         slowPrint(fastText, f"Rooms: {', '.join(sorted(unique_rooms))}\n")
 
+    
+    # Print detailed reservations in this format not in the table as this is easier to copy and paste
+    slowPrint(fastText, f"\nDetailed Reservations:\n")
     for room, res in userReservations:
         slowPrint(fastText, f"Room: {room}, Date: {res.date}, Start Time: {res.startTime}:00, End Time: {res.endTime}:00, Reason: {res.reason}\n")
 
@@ -220,14 +224,14 @@ def generateRoomStatistics(roomName, startDate, endDate):
         unique_users.add(reservation.name)
         user_counts[reservation.name] = user_counts.get(reservation.name, 0) + 1
 
-    slowPrint(fastText, f"\nSummary for {roomName} from {startDate} to {endDate}:\n")
+    slowPrint(fastText, f"Summary for {roomName} from {startDate} to {endDate}:\n\n")
     slowPrint(fastText, f"Total times booked: {total_reservations}\n")
     slowPrint(fastText, f"Unique users: {len(unique_users)}\n")
     if unique_users:
         slowPrint(fastText, "Bookings per user:\n")
         for user, count in user_counts.items():
             slowPrint(fastText, f"  {user}: {count} time(s)\n")
-    slowPrint(fastText, f"\nReservations for {roomName} from {startDate} to {endDate}:\n")
+    slowPrint(fastText, f"\nDetailed Reservations for {roomName} from {startDate} to {endDate}:\n")
     for res in roomReservations:
         slowPrint(fastText, f"Name: {res.name}, Role: {res.role}, Date: {res.date}, Start Time: {res.startTime}:00, End Time: {res.endTime}:00, Reason: {res.reason}\n")
 
