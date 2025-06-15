@@ -246,6 +246,9 @@ def searchAvailableHours():
     if startDate > endDate:
         slowPrint(fastText, "Ending date is before starting date, please try again.\n")
         return
+    
+    slowPrint(fastText, f"# means reserved, . means available\n")
+    
     while startDate <= endDate:
         hourVisualizer = []
         for i in range(24):
@@ -339,8 +342,9 @@ def deleteReservation():
     except ValueError:
         slowPrint(fastText, "Invalid input. Please enter a valid room name.\n")
         return
+    textSeparator()
     viewReservations(selectedRoom)
-    selectedReservation = inputChecker("which reservation would you like to delete?\t",int)
+    selectedReservation = inputChecker("Which reservation would you like to delete?\t",int)
     textSeparator()
     rooms[selectedRoom].pop(selectedReservation-1)
 
@@ -418,7 +422,7 @@ def yesNoInputChecker():
 
 def validRoomInputChecker():
     while True:
-        userInput = inputChecker('', str).lower()
+        userInput = inputChecker('', str)
         if userInput in rooms:
             return userInput
         else:
