@@ -91,7 +91,6 @@ def main():
             exit = True
         else:
             print("Invalid option. Please try again.")
-            pass
         # textSeparator()
         
 class Reservation:
@@ -388,6 +387,7 @@ def inputChecker(inputText = '', typeOfInput = str):
             userInput = typeOfInput(input(inputText))
             return userInput
         except ValueError:
+            print("Invalid input. please try again.\t")
             continue
 
 # Function to print text with a delay between each character
