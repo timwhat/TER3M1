@@ -12,7 +12,7 @@ currentDate = datetime.datetime.now().strftime("%Y-%m-%d")
 
 # lengths for the tables
 # Date, Start Time, End Time, Name, Role, Reason
-lengths = [10, 10, 8, 13, 11, 32]
+lengths = [2, 10, 10, 8, 13, 11, 32]
 
 
 # Reservation System for a School
@@ -45,7 +45,6 @@ def main():
                 createReservation()
             elif subChoice == 2:
                 deleteReservation()
-                slowPrint(fastText, "Deleting the reservation...\n")
             else:
                 slowPrint(fastText, "Invalid option. Please try again.\n")
                 continue
@@ -332,7 +331,7 @@ def createReservation():
         slowPrint(fastText, "Reservation created successfully!\n")
 
 def deleteReservation():
-    # TODO Complete nice formatting
+    textSeparator()
     slowPrint(fastText, "Which room would you like to delete a reservation from?\t")
     try:
         selectedRoom = inputChecker("", str)
@@ -344,9 +343,20 @@ def deleteReservation():
         return
     textSeparator()
     viewReservations(selectedRoom)
-    selectedReservation = inputChecker("Which reservation would you like to delete?\t",int)
+    selectedReservation = inputChecker("Which reservation would you like to delete? [-1 to exit]\t",int)
+    if selectedReservation == -1:
+        slowPrint(fastText, "Exiting deletion process.\n")
+        return
+    if selectedReservation < 1 or selectedReservation > len(rooms[selectedRoom]):
+        slowPrint(fastText, "Invalid reservation number. Please try again.\n")
+        return
+    slowPrint(fastText, "To confirm, you are deleting this reservation [y/n]:\t")
+    if not yesNoInputChecker():
+        slowPrint(fastText, "Deletion cancelled.\n")
+        return
+    else:
+        slowPrint(fastText, "Deleting the reservation...\n")
     textSeparator()
-    rooms[selectedRoom].pop(selectedReservation-1)
 
 # Check if the time slot is available
 def checkTimeSlot(room, date, startTime, endTime):
@@ -459,13 +469,14 @@ def lengthCorrector(string, length):
     return string[:length]
 
 def reservationInfoTablePrinter(roomList):
-    slowPrint(fastText, "|-- Reservation Information --------------------------------------------------------------------------|\n")
-    slowPrint(fastText, "| Date       | Start Time | End Time | Name          | Role        | Reason                           |\n")
-    slowPrint(fastText, "|------------|------------|----------|---------------|-------------|----------------------------------|\n")
-    for row in roomList:
+    slowPrint(fastText, "|------- Reservation Information --------------------------------------------------------------------------|\n")
+    slowPrint(fastText, "|    | Date       | Start Time | End Time | Name          | Role        | Reason                           |\n")
+    slowPrint(fastText, "|----|------------|------------|----------|---------------|-------------|----------------------------------|\n")
+    for index,row in enumerate(roomList):
         # If row is a Reservation object, extract its attributes
         if hasattr(row, 'date') and hasattr(row, 'startTime'):
             fields = [
+                str(index+1),
                 row.date,
                 f"{row.startTime}:00",
                 f"{row.endTime}:00",
@@ -479,7 +490,7 @@ def reservationInfoTablePrinter(roomList):
         for i, field in enumerate(fields):
             row_str += f" {lengthCorrector(str(field), lengths[i])} |"
         slowPrint(fastText, row_str + "\n")
-    slowPrint(fastText, "|------------|------------|----------|---------------|-------------|----------------------------------|\n\n")
+    slowPrint(fastText, "|----|------------|------------|----------|---------------|-------------|----------------------------------|\n\n")
 
 main()
 
